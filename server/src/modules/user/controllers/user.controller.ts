@@ -11,7 +11,7 @@ class UserController {
 
     const userData = await getUserById(currentUser.user.id);
 
-    return constructReply(ctx, 200, { data: serialize(ctx, userData) });
+    return constructReply(ctx, 200, { data: serialize(userData) });
   }
 }
 

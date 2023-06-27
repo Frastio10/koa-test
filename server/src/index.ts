@@ -1,19 +1,16 @@
-import Koa, { Middleware } from "koa";
+import Koa from "koa";
 import http from "node:http";
 import logger from "koa-logger";
 import json from "koa-json";
 import cors from "@koa/cors";
 import bodyParser from "koa-bodyparser";
 import jwt from "koa-jwt";
-import koaWs, { MiddlewareContext } from "koa-websocket";
 
 import "dotenv/config";
 
 import bootstrap from "./bootstrap";
-import { testEmail } from "./config/mailer";
-import Router from "koa-router";
-import { WebSocketServer } from "ws";
-import initWebsocket from "./websocket";
+// import { WebSocketServer } from "ws";
+import { WsChatServer } from "./websocket";
 
 const PORT = process.env.PORT as string;
 
@@ -32,8 +29,8 @@ app.use(logger());
 app.use(jwt({ secret: process.env.APP_SECRET as string, passthrough: true }));
 
 bootstrap(app);
-initWebsocket(app, httpServer);
 
-testEmail();
+const chatServer = new WsChatServer(app, httpServer);
+chatServer.start();
 
 httpServer.listen(PORT, () => console.log("Koa started on port: " + PORT));
