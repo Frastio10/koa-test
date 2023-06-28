@@ -1,14 +1,16 @@
 import fs from "fs";
 import path from "path";
 import Koa from "koa";
-import Router from "koa-router"
+import Router from "koa-router";
+import jobs from "./config/cron";
 
-import './config/db'
+import "./config/db";
+import CronService from "./cron";
+import { CustomWebSocketServer } from "./websocket";
+import { Server } from "http";
 
-export default function (app: Koa) {
-
+const getHTTPModules = (app: Koa) => {
   const modulesDir = path.join(__dirname, "modules");
-
   fs.readdirSync(modulesDir).forEach((moduleName) => {
     const modulePath = path.join(modulesDir, moduleName);
     const routerPath = path.join(
@@ -19,18 +21,23 @@ export default function (app: Koa) {
 
     if (fs.existsSync(routerPath)) {
       const moduleRouter = require(routerPath).default;
-      const router = new Router()
+      const router = new Router();
 
-      router.use(`/${moduleName}`, moduleRouter.routes())
-      
+      router.use(`/${moduleName}`, moduleRouter.routes());
+
       app.use(router.routes());
       app.use(router.allowedMethods());
     }
-
-    // const moduleWebsocketPath = path.join(modulePath, 'websocket.js')
-    // if(fs.existsSync(moduleWebsocketPath)){
-    //   const moduleWebsocket = require(moduleWebsocketPath).default
-    //   moduleWebsocket(app)
-    // }
   });
+};
+
+export default function (app: Koa, httpServer: Server) {
+  getHTTPModules(app);
+
+  const cron = new CronService();
+  cron.add(jobs);
+  cron.start();
+
+  const chatServer = new CustomWebSocketServer(app, httpServer);
+  chatServer.start();
 }

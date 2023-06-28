@@ -1,11 +1,17 @@
 import Koa from "koa";
-import { EnhancedWebsocket } from "../websocket";
 import { verifyJwt } from "../utils";
+import BasePacket from "../shared/BasePacket";
+import { CustomWebSocket } from "../shared";
 
-export = {
-  packetId: "CHK_USER",
-  isAuthOnly: false,
-  callback: (koa: Koa, ws: EnhancedWebsocket, data: any) => {
+export = class CheckUser extends BasePacket {
+  constructor() {
+    super({
+      packetId: "CHK_USER",
+      isAuthOnly: false,
+    });
+  }
+
+  callback(koa: Koa, ws: CustomWebSocket, data: any) {
     try {
       const clientData = global.clients.get(data.Token);
       if (clientData) {
@@ -27,5 +33,5 @@ export = {
       console.log(err);
       return ws.unauthorized();
     }
-  },
-};
+  }
+}

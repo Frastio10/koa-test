@@ -1,8 +1,9 @@
 import { Context } from "koa";
+import { BaseController } from "../../../shared";
 import { constructReply, serialize } from "../../../utils";
 import { getUserById } from "../services/user.services";
 
-class UserController {
+class UserController extends BaseController {
   async me(ctx: Context) {
     const currentUser = ctx.state.user;
     if (!currentUser) {

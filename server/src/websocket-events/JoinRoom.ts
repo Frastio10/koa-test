@@ -1,11 +1,17 @@
 import Koa from "koa";
 import { verifyJwt } from "../utils";
-import { EnhancedWebsocket } from "../websocket";
+import BasePacket from "../shared/BasePacket";
+import { CustomWebSocket } from "../shared";
 
-export = {
-  packetId: "JOIN",
-  isAuthOnly: true,
-  callback: (koa: Koa, ws: EnhancedWebsocket, data: any) => {
+export = class JoinRoom extends BasePacket {
+  constructor() {
+    super({
+      packetId: "JOIN_ROOM",
+      isAuthOnly: false,
+    });
+  }
+
+  callback(koa: Koa, ws: CustomWebSocket, data: any) {
     try {
       const room = global.rooms.get(data.RoomID);
       const clientData = verifyJwt(data.Token) as any;
@@ -32,8 +38,9 @@ export = {
       });
 
       room.clientCount = room.clients.length;
+      console.log(this.server);
 
-      return ws.broadcastToRoom(data.RoomID, "USER_JOINED", {
+      return this.server?.broadcastToRoom(data.RoomID, "USER_JOINED", {
         Message: "A user joined the room",
         RoomID: data.RoomID,
         ClientCount: room.clients.length,
@@ -47,5 +54,5 @@ export = {
       console.log(err);
       return ws.serverError();
     }
-  },
+  }
 };

@@ -6,9 +6,10 @@ import User from "../../user/models/user.model";
 import { constructReply, createRandomString } from "../../../utils";
 import { sendMail } from "../../../config/mailer";
 import { getUser, getUsers } from "../../user/services/user.services";
+import { BaseController } from "../../../shared";
 
 const VERIFY_CODE_TIME = 60;
-class AuthController {
+class AuthController extends BaseController {
   async login(ctx: Context) {
     try {
       if (ctx.state.user) {
